@@ -61,25 +61,25 @@ class AuthControllers {
   }
 
   static async login(req, res) {
-    const { email, user_id, password } = req.body;
+    const { user, password } = req.body;
 
     try {
-      let user = await Users.findOne({ email });
-      if (!user) {
-        user = await Users.findOne({ user_id });
+      let _user = await Users.findOne({ email: user });
+      if (!_user) {
+        _user = await Users.findOne({ user_id: user });
       }
-      if (!user){
+      if (!_user){
         return sendResponse(req, res, 403, true, false, 'User does not exist')
       }
 
-      const comparePassword = bcrypt.compareSync(password, user._doc.password);
+      const comparePassword = bcrypt.compareSync(password, _user._doc.password);
 
       if(!comparePassword) return sendResponse(req, res, 403, true, false, 'Incorrect password')
 
-      delete user._doc.password;
-      delete user._doc.__v;
+      delete _user._doc.password;
+      delete _user._doc.__v;
 
-      const token = jwt.sign(user._doc, process.env.JWT_SECRET);
+      const token = jwt.sign(_user._doc, process.env.JWT_SECRET);
 
       //    await sendEmailService({
       //     to: email,
